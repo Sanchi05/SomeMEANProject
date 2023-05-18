@@ -6,20 +6,27 @@ var {Employee} = require('../models/employee'); //
  
 
 //creating a get Request
-
 router.get('/getAllEmployees',(req,res)=>{
-    
     Employee.find({}).then(docs => {
-            console.log(docs);
-            res.send(docs);
+            console.log(docs.length);
+            const successResponse = '{"payload":' + JSON.stringify(docs) + '}';
+            const nullMessage = '{"message": "No records available"}';
+            if (docs.length === 0){
+                res.send(JSON.parse(nullMessage));
+            } else {
+                res.send(JSON.parse(successResponse));
+            }
         }).catch(
-            err => console.error(err)
+            err => {
+                const errorResponse = '{"message":"Error occured while fetching employee data"}';
+                console.error("Error occured while fetching employee data with error:",err);
+                res.send(JSON.parse(errorResponse));
+            }
         );
 });
 
 // Creating a post request
 router.post("/",(req,res) => {
-    //Creating an instance of model Employee
     var emp = new Employee({
         empId : req.body.empId,
         name : req.body.name,
@@ -27,12 +34,16 @@ router.post("/",(req,res) => {
         officeLocation : req.body.officeLocation,
         salary : req.body.salary
     });
-    if (emp.save()){
-        console.log("The document saved in collection is :",JSON.stringify(emp));
-        res.send(emp);
-    }
+    emp.save().then(doc => {
+        console.log("The document saved in the collection is:",doc);
+        const successResponse = '{"payload":' + JSON.stringify(doc) + '}';
+        res.send(JSON.parse(successResponse));
+    }).catch(err => {
+        const errorResponse = '{"message":"Error occured while saving the document."}';
+        console.log("Error while saving the document for id:",emp.empId, "with error:",err);
+        res.send(JSON.parse(errorResponse));
+    })
 })
-
 
 //Creating a get request to get data for a particular employee id
 router.get("/getEmployee/:id", (req,res) => {
@@ -47,11 +58,34 @@ router.get("/getEmployee/:id", (req,res) => {
             } else {
                 res.send(JSON.parse(nullMessage));
             }
-        }).catch (
-            (err) => {
-                console.log("Error while fetching data message:",err);
+        }).catch ( err => {
+                const errorResponse = '{"message":"Error occured while fetching employee data for id: "'+ id +'}';
+                res.send(JSON.parse(errorResponse));
+                console.error("Error occured while fetching employee data for id:",id, "with error:",err);
             }
         );
 });
+
+//Updating endpoint using put http method
+router.put("/updateEmployee/:id", (req,res) => {
+    const id = req.params.id;
+    const nullMessage = '{"message": "No updates made as no record found for the given id : ' + id +'}';
+    var emp = req.body;
+    Employee.findOneAndUpdate({empId: id}, emp,{new:true}).then(doc=>{
+        if(doc === null){
+            console.log(nullMessage);
+            res.send(JSON.parse(nullMessage));
+        } else {
+            console.log("The updated document is",doc)
+            const successResponse = '{"payload":' + JSON.stringify(doc) + '}';
+            res.send(JSON.parse(successResponse));
+        }
+    }).catch (err => {
+        const errorResponse = '{"message":"Error while updating the data of given id: "'+ id +'}';
+        res.send(JSON.parse(errorResponse));
+        console.log("Error while updating the data of given id:", id, "with error:",err);        
+    });
+});
+
 
 module.exports = router;
