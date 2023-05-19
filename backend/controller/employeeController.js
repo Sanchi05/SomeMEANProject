@@ -5,8 +5,8 @@ let router = express.Router(); //using Router() function
 var {Employee} = require('../models/employee'); //
  
 
-//creating a get Request
-router.get('/getAllEmployees',(req,res)=>{
+//1. creating a get Request
+router.get('/',(req,res)=>{
     Employee.find({}).then(docs => {
             console.log(docs.length);
             const successResponse = '{"payload":' + JSON.stringify(docs) + '}';
@@ -25,7 +25,7 @@ router.get('/getAllEmployees',(req,res)=>{
         );
 });
 
-// Creating a post request
+// 2. Creating a post request to save employee
 router.post("/",(req,res) => {
     var emp = new Employee({
         empId : req.body.empId,
@@ -45,7 +45,7 @@ router.post("/",(req,res) => {
     })
 })
 
-//Creating a get request to get data for a particular employee id
+//3. Creating a get request to get data for a particular employee id
 router.get("/getEmployee/:id", (req,res) => {
     const nullMessage = '{"message": "No record found for the given id"}';
     const id = req.params.id;
@@ -66,7 +66,7 @@ router.get("/getEmployee/:id", (req,res) => {
         );
 });
 
-//Updating endpoint using put http method
+//4. Updating endpoint using put http method
 router.put("/updateEmployee/:id", (req,res) => {
     const id = req.params.id;
     const nullMessage = '{"message": "No updates made as no record found for the given id : ' + id +'}';
@@ -87,7 +87,7 @@ router.put("/updateEmployee/:id", (req,res) => {
     });
 });
 
-//Deleting by empId and using Roter.delete() method
+//5. Deleting by empId and using Roter.delete() method
 router.delete("/deleteEmployee/:id",(req,res)=>{
     const id = req.params.id;
     const successMessage = '{"message":"Employee data removed sucessfully."}';
@@ -101,10 +101,34 @@ router.delete("/deleteEmployee/:id",(req,res)=>{
             console.log("Employee removed succesfully for id:",id); 
         }
     }).catch ((err)=>{
-        res.sendStatus(500);
+        const errorMessage = {
+            "status":"500",
+            "message":"Error occured while performing the operation"
+        }
+        res.status(500).json(errorMessage);
         console.log("Error while removing the employee data of given id:", id, "with error:",err);
     })
-})
- 
+});
+
+//6. Deleting all employees
+router.delete("/deleteAllEmployees",(req,res)=>{
+    Employee.deleteMany().then(()=>{
+        //const successMessage = '{"message":"All employees deleted sucessfully!"}';
+        const success = {
+            "status" : "200",
+            "message" : "All employees deleted successfully."
+        }
+        //res.send(JSON.parses(successMessage));
+        res.status(200).json(success);
+        console.log("All employees deleted successfully");
+    }).catch ((err)=>{
+        const error = {
+            "status" : "500",
+            "message" : "Error occured while deleting employess"
+        }
+        console.log("Error while removing the employees",err);
+        res.status(500).json(error);
+    });
+});
 
 module.exports = router;
