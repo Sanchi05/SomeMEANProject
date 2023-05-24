@@ -6,7 +6,7 @@ var app = express();
 const employeeController = require ('./controller/employeeController.js')
 app.use(bodyParser.json());
 
-app.listen(4200,()=>{
+app.listen(3000,()=>{
     console.log("Server started at port 4200")
 });
 
