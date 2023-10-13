@@ -87,7 +87,7 @@ router.put("/updateEmployee/:id", (req,res) => {
     });
 });
 
-//5. Deleting by empId and using Roter.delete() method
+//5. Deleting by empId and using Router.delete() method
 router.delete("/deleteEmployee/:id",(req,res)=>{
     const id = req.params.id;
     const successMessage = '{"message":"Employee data removed sucessfully."}';
